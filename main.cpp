@@ -10,11 +10,12 @@ int main() {
     char *buff = nullptr;
     const char* input_file = "input.txt";
     const char* output_file = "output.txt";
+
+    clear_output(output_file);
+
     int poem_size = read_file(&buff, input_file);
     std::string_view *lines = nullptr;
     int count = make_string_array(&lines, &buff, poem_size);
-
-    clear_output(output_file);
 
     std::sort(lines, lines + count, &begin_cmp);
     print_lines(count, &lines, output_file);

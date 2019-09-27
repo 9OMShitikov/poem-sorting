@@ -21,13 +21,16 @@ size_t read_file (char **buff, const char* input_name){
     input_file = fopen(input_name, "r");
     assert(input_file);
 
-    fseek(input_file, 0L, SEEK_END);
-    size_t size = ftell(input_file);
-    fseek(input_file, 0L, SEEK_SET);
+    assert(fseek(input_file, 0L, SEEK_END) == 0);
+    int size = ftell(input_file);
+    assert(size >= 0);
+    assert(fseek(input_file, 0L, SEEK_SET) == 0);
 
     *buff = (char *) calloc(size + 1, sizeof(char));
-    fread(*buff, sizeof(char), size + 1, input_file);
-    fclose(input_file);
+    if (fread(*buff, sizeof(char), size + 1, input_file) != size + 1) {
+        assert(feof(input_file));
+    }
+    assert(fclose(input_file) == 0);
     ++size;
 
     char *cur_buff_symbol = *buff + (size - 2);
@@ -133,7 +136,7 @@ bool end_cmp (std::string_view str_1, std::string_view str_2) {
 void clear_output(const char *output_name) {
     FILE *file = fopen(output_name, "w");
     assert(file);
-    fclose(file);
+    assert(fclose(file) == 0);
 }
 
 ///Prints lines from the poem array to output file
@@ -152,7 +155,7 @@ void print_lines(size_t count, std::string_view **poem, const char *output_name)
         fputc('\n', file);
     }
     fputs("-------------\n", file);
-    fclose(file);
+    assert(fclose(file) == 0);
 }
 
 ///Prints buffer to output file
@@ -168,11 +171,12 @@ void print_buff(size_t size, char **buff, const char *output_name) {
     assert(file);
     for (int i = 0; i < size; i++) {
         if (i == 0 || (*buff)[i - 1] == '\0') {
-            fputs(*buff + i, file);
+            assert(fputs(*buff + i, file) != EOF);
             fputc('\n', file);
+            assert(!ferror(file));
         }
     }
-    fclose(file);
+    assert(fclose(file) == 0);
 }
 
 #endif //POEM_SORT_FINAL_POEM_SORT_FUNCTIONS_H
